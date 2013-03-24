@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 
 #include "vbo/player.h"
 
@@ -52,9 +52,8 @@ void boot_init() {
   // This is where Ill put the logo thing
   unsigned logo = bitmap_load("bmp/logo.bmp");
   unsigned logo_vbo;
-  long physics_resolution = 16667;
   float t0, t1, dt;
-  float logo_x = 16, logo_y = -68;
+  float logo_x = 16, logo_y = -80;
   float logo_v[] = {
     0,     0, 0, 0,
     0,   128, 0, 1,
@@ -89,8 +88,12 @@ void boot_init() {
   glEnableVertexAttribArray(logo_program->attribute[1]);
   glVertexAttribPointer(logo_program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
 
-   t0 = glfwGetTime();
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  glfwSwapBuffers();
 
+  sleep(1);
+
+  t0 = glfwGetTime();
   while (logo_y < 8) {
 
     t1 = glfwGetTime();
@@ -99,8 +102,7 @@ void boot_init() {
 
     logo_y += 50 * dt;
 
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     glUniform2f(logo_program->uniform[0], logo_x, logo_y);
 
@@ -108,14 +110,49 @@ void boot_init() {
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     glfwSwapBuffers();
-
-    usleep(physics_resolution);
   }
+
+  glDisableVertexAttribArray(logo_program->attribute[0]);
+  glDisableVertexAttribArray(logo_program->attribute[1]);
 
   sleep(1);
 }
 
+float TILES_VBO[] = {
+
+  0, 0, 0,     0,     0,
+  1, 0, 8,     0, .0625,
+  2, 8, 8, .0625, .0625,
+  3, 8, 0, .0625,     0,
+};
+
 void game_init(GameState* gs) {
+
+  int i, j;
+
+  for (j = 0; j < 256; j++) {
+
+    for (i = 0; i < 256; i++) {
+
+      gs->tilemap[i][j] = rand()%2;
+    }
+  }
+
+  // Bind tiles vbo
+  glGenBuffers(1, &gs->tiles_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, gs->tiles_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(TILES_VBO)*sizeof(float), TILES_VBO, GL_STATIC_DRAW);
+
+  gs->tiles_sheet = bitmap_load("bmp/tiles.bmp");
+  gs->tiles_program = pipeline_new(
+    shader_new(SHADER_VERTEX, "shader/tiles.vert"),
+    shader_new(SHADER_FRAGMENT, "shader/tiles.frag"));
+
+  pipeline_attribute(gs->tiles_program, "id", 0);
+  pipeline_attribute(gs->tiles_program, "coord", 1);
+  pipeline_attribute(gs->tiles_program, "uv", 2);
+  pipeline_uniform(gs->tiles_program, "pos", 0);
+  pipeline_uniform(gs->tiles_program, "texture", 1);
 
   // Bind player vbo
   glGenBuffers(1, &gs->player_vbo);
@@ -124,8 +161,17 @@ void game_init(GameState* gs) {
 
   // load player spritesheet
   gs->player_spritesheet = bitmap_load("bmp/player.bmp");
+  gs->player_x = gs->player_y = gs->player_vx = gs->player_vy = 0;
 
   // create player render pipeline
+  gs->player_program = pipeline_new(
+    shader_new(SHADER_VERTEX, "shader/player.vert"),
+    shader_new(SHADER_FRAGMENT, "shader/player.frag"));
+
+  pipeline_attribute(gs->player_program, "coord", 0);
+  pipeline_attribute(gs->player_program, "uv", 1);
+  pipeline_uniform(gs->player_program, "pos", 0);
+  pipeline_uniform(gs->player_program, "texture", 1);
 }
 
 void boot_shutdown() {

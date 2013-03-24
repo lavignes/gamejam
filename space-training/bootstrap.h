@@ -1,6 +1,7 @@
 #ifndef BOOTSTRAP_H 
 #define BOOTSTRAP_H
 
+#include <unistd.h>
 #include <assert.h>
 #include <stdbool.h>
 
@@ -18,8 +19,18 @@ typedef struct GameState {
   double dt;            // dt of physics
   double fps;
 
+  unsigned tiles_vbo;
+  unsigned tiles_sheet;
+  Pipeline* tiles_program;
+
   unsigned player_vbo;  // vbo id for player
   unsigned player_spritesheet;
+  float player_frame;
+  float player_vx, player_vy;
+  float player_x, player_y;
+  Pipeline* player_program;
+
+  char tilemap[256][256];
 
 } GameState;
 

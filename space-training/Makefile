@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -DGLEW_STATIC -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function -std=gnu99
-LDFLAGS = -lglfw -lGLEW -lGL
+LDFLAGS = -lglfw -lGLEW -lGL -lm
 
 SRCS = bootstrap.c shader.c bitmap.c game.c
 OBJS = $(SRCS:.c=.o)
