@@ -8,6 +8,11 @@ int main(int argc, char** argv) {
 
   GameState gs;
 
+  // Load everything importante~ into the gamestate
+  game_init(&gs);
+
+  glfwSetWindowTitle("Space Training");
+
   // Game loop
   while (glfwGetWindowParam(GLFW_OPENED) == true) {
 
