@@ -85,10 +85,18 @@ static inline void render(GameState* gs) {
   glEnableVertexAttribArray(gs->tiles_program->attribute[2]);
   glVertexAttribPointer(gs->tiles_program->attribute[2], 2, GL_FLOAT, false, 5*sizeof(float), (void*)(3 * sizeof(float)));
 
-  for (j = 0; j < 19; j++) {
-    for (i = 0; i < 21; i++) {
+  int cam_x = gs->player_x/8;
+  int cam_y = gs->player_y/8;
+
+  if (cam_x+21 > 256) cam_x = 256-21;
+  else if (cam_x < 0) cam_x = 0;
+  if (cam_y+19 > 256) cam_y = 256-19;
+  else if (cam_y < 0) cam_y = 0;
+
+  for (j = cam_y; j < 19+cam_y; j++) {
+    for (i = cam_x; i < 21+cam_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
-      glUniform2f(gs->tiles_program->uniform[0], 8*i, 8*j);
+      glUniform2f(gs->tiles_program->uniform[0], 8*i-gs->player_x, 8*j-gs->player_y);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
   }
@@ -100,7 +108,7 @@ static inline void render(GameState* gs) {
   glUseProgram(gs->player_program->id);
 
   //glUniform2f(gs->player_program->uniform[0], roundf(gs->player_x), roundf(gs->player_y));
-  glUniform2f(gs->player_program->uniform[0], gs->player_x, gs->player_y);
+  glUniform2f(gs->player_program->uniform[0], 160/2-8, 144/2-8);
 
   // Bind the player to texture 0
   glBindTexture(GL_TEXTURE_2D, gs->player_spritesheet);
