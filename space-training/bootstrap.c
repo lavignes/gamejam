@@ -3,9 +3,9 @@
 #include <math.h>
 
 #include <AL/alut.h>
-#include <AL/alext.h>
 
 #include "vbo/player.h"
+#include "sound.h"
 
 #include "bootstrap.h"
 
@@ -98,9 +98,10 @@ void boot_init(int* argc, char** argv) {
   // load sound
   unsigned sound_source;
   alGenSources(1, &sound_source);
-  unsigned ding = alutCreateBufferFromFile("sound/ding.wav");
+  Sound* ding = sound_load("sound/ding.ogg");
 
-  alSourcei(sound_source, AL_BUFFER, ding);
+  alSourcei(sound_source, AL_BUFFER, ding->buffer);
+  
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers();
 
