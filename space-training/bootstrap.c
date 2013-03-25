@@ -98,7 +98,7 @@ void boot_init(int* argc, char** argv) {
   // load sound
   unsigned sound_source;
   alGenSources(1, &sound_source);
-  unsigned ding = alutCreateBufferFromFile("sound/step.wav");
+  unsigned ding = alutCreateBufferFromFile("sound/ding.wav");
 
   alSourcei(sound_source, AL_BUFFER, ding);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
