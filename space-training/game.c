@@ -38,24 +38,27 @@ int main(int argc, char** argv) {
 
     
     if (glfwGetKey(GLFW_KEY_UP)) {
-      gs.player_vy -= 400 * dt;
+      gs.player_vy -= 200 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_DOWN)) {
-      gs.player_vy += 400 * dt;
+      gs.player_vy += 200 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_LEFT)) {
-      gs.player_vx -= 400 * dt;
+      gs.player_vx -= 200 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_RIGHT)) {
-      gs.player_vx += 400 * dt;
+      gs.player_vx += 200 * dt;
     }
 
+    gs.player_vx = clampf(gs.player_vx, -100, 100);
+    gs.player_vy = clampf(gs.player_vy, -100, 100);
+
     gs.player_frame += dt;
-    gs.player_x += clampf(gs.player_vx * dt, -0.1, 0.1);
-    gs.player_y += clampf(gs.player_vy * dt, -0.1, 0.1);
+    gs.player_x += gs.player_vx * dt;
+    gs.player_y += gs.player_vy * dt;
 
     // Bouncy side walls
     if (gs.player_x < 0) {
