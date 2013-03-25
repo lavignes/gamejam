@@ -54,6 +54,31 @@ int main(int argc, char** argv) {
     gs.player_x += gs.player_vx * dt;
     gs.player_y += gs.player_vy * dt;
 
+    // Bouncy side walls
+    if (gs.player_x < 0) {
+      gs.player_x = 0;
+      gs.player_vx = -gs.player_vx/2;
+    } else if (gs.player_x > 256*8-16) {
+      gs.player_x = 256*8-16;
+      gs.player_vx = -gs.player_vx/2;
+    }
+    if (gs.player_y < 0) {
+      gs.player_y = 0;
+      gs.player_vy = -gs.player_vy/2;
+    } else if (gs.player_y > 256*8-16) {
+      gs.player_y = 256*8-16;
+      gs.player_vy = -gs.player_vy/2;
+    }
+
+    // camera follow
+    gs.cam_x = gs.player_x - 72;
+    if (gs.cam_x < 0) gs.cam_x = 0;
+    else if (gs.cam_x > 256*8-160) gs.cam_x = 256*8-160;
+
+    gs.cam_y = gs.player_y - 64;
+    if (gs.cam_y < 0) gs.cam_y = 0;
+    else if (gs.cam_y > 256*8-144) gs.cam_y = 256*8-144;
+
     render(&gs);
   }
   
@@ -85,18 +110,18 @@ static inline void render(GameState* gs) {
   glEnableVertexAttribArray(gs->tiles_program->attribute[2]);
   glVertexAttribPointer(gs->tiles_program->attribute[2], 2, GL_FLOAT, false, 5*sizeof(float), (void*)(3 * sizeof(float)));
 
-  int cam_x = gs->player_x/8;
-  int cam_y = gs->player_y/8;
+  int t_x = gs->cam_x/8;
+  int t_y = gs->cam_y/8;
 
-  if (cam_x+21 > 256) cam_x = 256-21;
-  else if (cam_x < 0) cam_x = 0;
-  if (cam_y+19 > 256) cam_y = 256-19;
-  else if (cam_y < 0) cam_y = 0;
+  if (t_x+21 > 256) t_x = 256-21;
+  else if (t_x < 0) t_x = 0;
+  if (t_y+19 > 256) t_y = 256-19;
+  else if (t_y < 0) t_y = 0;
 
-  for (j = cam_y; j < 19+cam_y; j++) {
-    for (i = cam_x; i < 21+cam_x; i++) {
+  for (j = t_y; j < 19+t_y; j++) {
+    for (i = t_x; i < 21+t_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
-      glUniform2f(gs->tiles_program->uniform[0], 8*i-gs->player_x, 8*j-gs->player_y);
+      glUniform2f(gs->tiles_program->uniform[0], 8*i-gs->cam_x, 8*j-gs->cam_y);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
   }
@@ -108,7 +133,7 @@ static inline void render(GameState* gs) {
   glUseProgram(gs->player_program->id);
 
   //glUniform2f(gs->player_program->uniform[0], roundf(gs->player_x), roundf(gs->player_y));
-  glUniform2f(gs->player_program->uniform[0], 160/2-8, 144/2-8);
+  glUniform2f(gs->player_program->uniform[0], gs->player_x-gs->cam_x, gs->player_y-gs->cam_y);
 
   // Bind the player to texture 0
   glBindTexture(GL_TEXTURE_2D, gs->player_spritesheet);

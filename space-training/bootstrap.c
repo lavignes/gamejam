@@ -161,7 +161,9 @@ void game_init(GameState* gs) {
 
   // load player spritesheet
   gs->player_spritesheet = bitmap_load("bmp/player.bmp");
-  gs->player_x = gs->player_y = gs->player_vx = gs->player_vy = 0;
+  gs->player_x = 160/2-8;
+  gs->player_y = 144/2-8;
+  gs->player_vx = gs->player_vy = 0;
 
   // create player render pipeline
   gs->player_program = pipeline_new(

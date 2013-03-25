@@ -19,6 +19,9 @@ typedef struct GameState {
   double dt;            // dt of physics
   double fps;
 
+  float cam_x;
+  float cam_y;
+
   unsigned tiles_vbo;
   unsigned tiles_sheet;
   Pipeline* tiles_program;
