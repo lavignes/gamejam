@@ -10,6 +10,7 @@
 
 #include "shader.h"
 #include "bitmap.h"
+#include "sound.h"
 
 #define fail_if(x) do { if (x) assert(#x && false); } while (false);
 
@@ -36,6 +37,10 @@ typedef struct GameState {
   Pipeline* player_program;
 
   char tilemap[256][256];
+
+  // Audio stuff
+  Sound* bounce_sound;
+  unsigned player_source; // Audio source for player sounds
 
 } GameState;
 

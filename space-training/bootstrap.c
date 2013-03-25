@@ -180,6 +180,10 @@ void game_init(GameState* gs) {
   pipeline_attribute(gs->player_program, "uv", 1);
   pipeline_uniform(gs->player_program, "pos", 0);
   pipeline_uniform(gs->player_program, "texture", 1);
+
+  // Load audio stuff
+  gs->bounce_sound = sound_load("sound/bounce.ogg");
+  alGenSources(1, &gs->player_source);
 }
 
 void boot_shutdown() {

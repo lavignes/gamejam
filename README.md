@@ -2,15 +2,16 @@ These are games I'm making for a educational project.
 Each will be made in around 48 hours of work.
 
 ##Dependencies:
-You need glfw glew and openal. On a debian based linux distribution you could
+You need glfw glew openal and vorbis. On a debian based linux distribution you could
 install them like this:
 
-`# apt-get install libglfw-dev libglew1.6-dev libalut-dev`
+`# apt-get install libglfw-dev libglew1.6-dev libalut-dev libvorbis-dev`
 
 For OSX it's probably:
 `$ brew install glfw`
 `$ brew install glew`
 `$ brew install alut`
+`$ brew install libvorbis`
 
 Though the makefile would need to be slightly tweaked for opengl.
 
