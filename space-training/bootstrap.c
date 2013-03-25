@@ -121,10 +121,10 @@ void boot_init() {
 
 float TILES_VBO[] = {
 
-  0, 0, 0,     0,     0,
-  1, 0, 8,     0, .0625,
-  2, 8, 8, .0625, .0625,
-  3, 8, 0, .0625,     0,
+  0, 0,     0,     0,
+  0, 8,     0, .0625,
+  8, 8, .0625, .0625,
+  8, 0, .0625,     0,
 };
 
 void game_init(GameState* gs) {
@@ -135,7 +135,7 @@ void game_init(GameState* gs) {
 
     for (i = 0; i < 256; i++) {
 
-      gs->tilemap[i][j] = rand()%2;
+      gs->tilemap[i][j] = rand()%64;
     }
   }
 
@@ -149,11 +149,11 @@ void game_init(GameState* gs) {
     shader_new(SHADER_VERTEX, "shader/tiles.vert"),
     shader_new(SHADER_FRAGMENT, "shader/tiles.frag"));
 
-  pipeline_attribute(gs->tiles_program, "id", 0);
-  pipeline_attribute(gs->tiles_program, "coord", 1);
-  pipeline_attribute(gs->tiles_program, "uv", 2);
+  pipeline_attribute(gs->tiles_program, "coord", 0);
+  pipeline_attribute(gs->tiles_program, "uv", 1);
   pipeline_uniform(gs->tiles_program, "pos", 0);
   pipeline_uniform(gs->tiles_program, "texture", 1);
+  pipeline_uniform(gs->tiles_program, "tile", 2);
 
   // Bind player vbo
   glGenBuffers(1, &gs->player_vbo);

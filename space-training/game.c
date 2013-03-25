@@ -104,11 +104,9 @@ static inline void render(GameState* gs) {
   // Bind tiles vbo
   glBindBuffer(GL_ARRAY_BUFFER, gs->tiles_vbo);
   glEnableVertexAttribArray(gs->tiles_program->attribute[0]);
-  glVertexAttribPointer(gs->tiles_program->attribute[0], 1, GL_FLOAT, false, 5*sizeof(float), (void*)0);
+  glVertexAttribPointer(gs->tiles_program->attribute[0], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(0 * sizeof(float)));
   glEnableVertexAttribArray(gs->tiles_program->attribute[1]);
-  glVertexAttribPointer(gs->tiles_program->attribute[1], 2, GL_FLOAT, false, 5*sizeof(float), (void*)(1 * sizeof(float)));
-  glEnableVertexAttribArray(gs->tiles_program->attribute[2]);
-  glVertexAttribPointer(gs->tiles_program->attribute[2], 2, GL_FLOAT, false, 5*sizeof(float), (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(gs->tiles_program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
 
   int t_x = gs->cam_x/8;
   int t_y = gs->cam_y/8;
@@ -116,6 +114,7 @@ static inline void render(GameState* gs) {
   for (j = t_y; j < 19+t_y; j++) {
     for (i = t_x; i < 21+t_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
+      glUniform2f(gs->tiles_program->uniform[2], gs->tilemap[i][j]%16, gs->tilemap[i][j]/16);
       glUniform2f(gs->tiles_program->uniform[0], 8*i-gs->cam_x, 8*j-gs->cam_y);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
@@ -123,7 +122,6 @@ static inline void render(GameState* gs) {
 
   glDisableVertexAttribArray(gs->tiles_program->attribute[0]);
   glDisableVertexAttribArray(gs->tiles_program->attribute[1]);
-  glDisableVertexAttribArray(gs->tiles_program->attribute[2]);
 
   glUseProgram(gs->player_program->id);
 
