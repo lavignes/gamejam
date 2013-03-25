@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <AL/alut.h>
+#include <AL/alext.h>
+
 #include "vbo/player.h"
 
 #include "bootstrap.h"
 
-void boot_init() {
+void boot_init(int* argc, char** argv) {
 
   int error;
 
@@ -33,6 +36,9 @@ void boot_init() {
   }
 
   printf("GL Extension Wrangler: %s\n", glewGetString(GLEW_VERSION));
+
+  // Load audio
+  fail_if(alutInit(argc, argv) == false);
 
   glClearColor(206.0/255.0, 230.0/255.0, 165.0/255.0, 1.0f);
   glEnable(GL_SCISSOR_TEST); // For geom culling
@@ -89,6 +95,12 @@ void boot_init() {
   glEnableVertexAttribArray(logo_program->attribute[1]);
   glVertexAttribPointer(logo_program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
 
+  // load sound
+  unsigned sound_source;
+  alGenSources(1, &sound_source);
+  unsigned ding = alutCreateBufferFromFile("sound/step.wav");
+
+  alSourcei(sound_source, AL_BUFFER, ding);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers();
 
@@ -112,6 +124,8 @@ void boot_init() {
 
     glfwSwapBuffers();
   }
+
+  alSourcePlay(sound_source);
 
   glDisableVertexAttribArray(logo_program->attribute[0]);
   glDisableVertexAttribArray(logo_program->attribute[1]);

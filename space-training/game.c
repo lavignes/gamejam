@@ -7,7 +7,7 @@
 static inline void render(GameState* gs);
 int main(int argc, char** argv) {
 
-  boot_init();
+  boot_init(&argc, argv);
 
   GameState gs;
 

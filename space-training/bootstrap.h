@@ -11,7 +11,7 @@
 #include "shader.h"
 #include "bitmap.h"
 
-#define fail_if(x) do { if (x) assert(false); } while (false);
+#define fail_if(x) do { if (x) assert(#x && false); } while (false);
 
 #define clampf(v, min, max) (v < min)? min : (v > max)? max : v;
 
@@ -39,7 +39,7 @@ typedef struct GameState {
 
 } GameState;
 
-void boot_init();
+void boot_init(int* argc, char** argv);
 void boot_shutdown();
 
 void game_init(GameState* gs);
