@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "vbo/player.h"
 
@@ -104,7 +105,7 @@ void boot_init() {
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    glUniform2f(logo_program->uniform[0], logo_x, logo_y);
+    glUniform2f(logo_program->uniform[0], roundf(logo_x), roundf(logo_y));
 
     // Render logo
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

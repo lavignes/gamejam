@@ -113,11 +113,6 @@ static inline void render(GameState* gs) {
   int t_x = gs->cam_x/8;
   int t_y = gs->cam_y/8;
 
-  if (t_x+21 > 256) t_x = 256-21;
-  else if (t_x < 0) t_x = 0;
-  if (t_y+19 > 256) t_y = 256-19;
-  else if (t_y < 0) t_y = 0;
-
   for (j = t_y; j < 19+t_y; j++) {
     for (i = t_x; i < 21+t_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
