@@ -20,7 +20,7 @@ void boot_init() {
   glfwSetWindowTitle("");
 
   glfwEnable(GLFW_AUTO_POLL_EVENTS); // Automatically poll input on swap
-  glfwSwapInterval(0); // 0: vsync off, 1: vsync on 
+  glfwSwapInterval(1); // 0: vsync off, 1: vsync on 
 
   printf("Renderer: %s\n", glGetString(GL_RENDERER));
   printf("GL Version: %s\n", glGetString(GL_VERSION));
@@ -128,16 +128,6 @@ float TILES_VBO[] = {
 };
 
 void game_init(GameState* gs) {
-
-  int i, j;
-
-  for (j = 0; j < 256; j++) {
-
-    for (i = 0; i < 256; i++) {
-
-      gs->tilemap[i][j] = rand()%64;
-    }
-  }
 
   // Bind tiles vbo
   glGenBuffers(1, &gs->tiles_vbo);

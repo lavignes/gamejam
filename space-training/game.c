@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "bootstrap.h"
+#include "tile.h"
 
 static inline void render(GameState* gs);
 int main(int argc, char** argv) {
@@ -12,6 +13,8 @@ int main(int argc, char** argv) {
 
   // Load everything importante~ into the gamestate
   game_init(&gs);
+
+  tileset_load(&gs, "level/1.bmp");
 
   glfwSetWindowTitle("Space Training");
   glClearColor(0.13725490196f, 0.25882352941f, 0.2f, 1.0f); // dark background
@@ -35,24 +38,24 @@ int main(int argc, char** argv) {
 
     
     if (glfwGetKey(GLFW_KEY_UP)) {
-      gs.player_vy -= 100 * dt;
+      gs.player_vy -= 400 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_DOWN)) {
-      gs.player_vy += 100 * dt;
+      gs.player_vy += 400 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_LEFT)) {
-      gs.player_vx -= 100 * dt;
+      gs.player_vx -= 400 * dt;
     }
 
     if (glfwGetKey(GLFW_KEY_RIGHT)) {
-      gs.player_vx += 100 * dt;
+      gs.player_vx += 400 * dt;
     }
 
     gs.player_frame += dt;
-    gs.player_x += gs.player_vx * dt;
-    gs.player_y += gs.player_vy * dt;
+    gs.player_x += clampf(gs.player_vx * dt, -0.1, 0.1);
+    gs.player_y += clampf(gs.player_vy * dt, -0.1, 0.1);
 
     // Bouncy side walls
     if (gs.player_x < 0) {
@@ -115,7 +118,7 @@ static inline void render(GameState* gs) {
     for (i = t_x; i < 21+t_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
       glUniform2f(gs->tiles_program->uniform[2], gs->tilemap[i][j]%16, gs->tilemap[i][j]/16);
-      glUniform2f(gs->tiles_program->uniform[0], 8*i-gs->cam_x, 8*j-gs->cam_y);
+      glUniform2f(gs->tiles_program->uniform[0], roundf(8*i-gs->cam_x), roundf(8*j-gs->cam_y));
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
   }
@@ -125,8 +128,7 @@ static inline void render(GameState* gs) {
 
   glUseProgram(gs->player_program->id);
 
-  //glUniform2f(gs->player_program->uniform[0], roundf(gs->player_x), roundf(gs->player_y));
-  glUniform2f(gs->player_program->uniform[0], gs->player_x-gs->cam_x, gs->player_y-gs->cam_y);
+  glUniform2f(gs->player_program->uniform[0], roundf(gs->player_x-gs->cam_x), roundf(gs->player_y-gs->cam_y));
 
   // Bind the player to texture 0
   glBindTexture(GL_TEXTURE_2D, gs->player_spritesheet);

@@ -13,6 +13,8 @@
 
 #define fail_if(x) do { if (x) assert(false); } while (false);
 
+#define clampf(v, min, max) (v < min)? min : (v > max)? max : v;
+
 typedef struct GameState {
 
   long unsigned frames; // # of frames rendered
