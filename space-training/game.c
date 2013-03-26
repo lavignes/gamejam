@@ -40,7 +40,6 @@ int main(int argc, char** argv) {
       gs.frames = 0;
     }
     gs.frames++;
-
     
     if (glfwGetKey(GLFW_KEY_UP)) {
       gs.player_vy -= 200 * dt;
@@ -195,6 +194,9 @@ static inline void render(GameState* gs) {
   glVertexAttribPointer(gs->player_program->attribute[0], 2, GL_FLOAT, false, 4*sizeof(float), (void*)0);
   glEnableVertexAttribArray(gs->player_program->attribute[1]);
   glVertexAttribPointer(gs->player_program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
+
+  // set player direction
+  glUniform1i(gs->player_program->uniform[2], (gs->player_vx > 0));
 
   glDrawArrays(GL_TRIANGLE_FAN, 4*((int)gs->player_frame % 2), 4);
 

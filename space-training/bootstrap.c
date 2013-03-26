@@ -167,8 +167,8 @@ void game_init(GameState* gs) {
 
   // load player spritesheet
   gs->player_spritesheet = bitmap_load("bmp/player.bmp");
-  gs->player_x = 160/2-8;
-  gs->player_y = 144/2-8;
+  gs->player_x = 0;
+  gs->player_y = 0;
   gs->player_vx = gs->player_vy = 0;
 
   // create player render pipeline
@@ -180,6 +180,7 @@ void game_init(GameState* gs) {
   pipeline_attribute(gs->player_program, "uv", 1);
   pipeline_uniform(gs->player_program, "pos", 0);
   pipeline_uniform(gs->player_program, "texture", 1);
+  pipeline_uniform(gs->player_program, "dir", 2);
 
   // Load audio stuff
   gs->bounce_sound = sound_load("sound/bounce.ogg");
