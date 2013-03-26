@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+
+#include <AL/al.h>
 
 #include "bootstrap.h"
 #include "tile.h"
 
 static inline void render(GameState* gs);
 int main(int argc, char** argv) {
+
+  int i;
 
   boot_init(&argc, argv);
 
@@ -53,27 +58,74 @@ int main(int argc, char** argv) {
       gs.player_vx += 200 * dt;
     }
 
-    gs.player_vx = clampf(gs.player_vx, -100, 100);
-    gs.player_vy = clampf(gs.player_vy, -100, 100);
+    gs.player_vx = clampf(gs.player_vx, -400, 400);
+    gs.player_vy = clampf(gs.player_vy, -400, 400);
 
     gs.player_frame += dt;
-    gs.player_x += gs.player_vx * dt;
-    gs.player_y += gs.player_vy * dt;
 
+    alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
+    alSourcef(gs.player_source, AL_PITCH, (rand()%30)/10.0); 
     // Bouncy side walls
     if (gs.player_x < 0) {
       gs.player_x = 0;
       gs.player_vx = -gs.player_vx/2;
+      alSourcePlay(gs.player_source);
     } else if (gs.player_x > 256*8-16) {
       gs.player_x = 256*8-16;
       gs.player_vx = -gs.player_vx/2;
+      alSourcePlay(gs.player_source);
     }
     if (gs.player_y < 0) {
       gs.player_y = 0;
       gs.player_vy = -gs.player_vy/2;
+      alSourcePlay(gs.player_source);
     } else if (gs.player_y > 256*8-16) {
       gs.player_y = 256*8-16;
       gs.player_vy = -gs.player_vy/2;
+      alSourcePlay(gs.player_source);
+    }
+
+    float old_x = gs.player_x;
+    float old_y = gs.player_y;
+
+    gs.player_x += gs.player_vx * dt;
+
+    for (i = 0; i < 3; i++) {
+
+      if (gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8)] == 3
+          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 1] == 3
+          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 2] == 3) {
+
+        gs.player_x = old_x;
+        alSourcePlay(gs.player_source);
+        if (gs.player_vx < 0)
+          gs.player_x = (int)(gs.player_x/8) * 8;
+        
+        else if (gs.player_vx > 0)
+          gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
+
+        gs.player_vx = -gs.player_vx/2;
+      }
+    }
+
+    gs.player_y += gs.player_vy * dt;
+
+    for (i = 0; i < 3; i++) {
+
+      if (gs.tilemap[(int)(gs.player_x / 8)][(int)((gs.player_y + (i * 8)) / 8)] == 3
+          || gs.tilemap[(int)(gs.player_x / 8) + 1][(int)((gs.player_y + (i * 8)) / 8)] == 3
+          || gs.tilemap[(int)(gs.player_x / 8) + 2][(int)((gs.player_y + (i * 8)) / 8)] == 3) {
+
+        gs.player_y = old_y;
+        alSourcePlay(gs.player_source);
+        if (gs.player_vy < 0)
+          gs.player_y = (int)(gs.player_y/8) * 8;
+        
+        else if (gs.player_vy > 0)
+          gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
+
+        gs.player_vy = -gs.player_vy/2;
+      }
     }
 
     // camera follow
