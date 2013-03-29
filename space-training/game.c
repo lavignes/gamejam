@@ -10,7 +10,7 @@
 static inline void render(GameState* gs);
 int main(int argc, char** argv) {
 
-  int i;
+  int i, j;
 
   boot_init(&argc, argv);
 
@@ -89,41 +89,51 @@ int main(int argc, char** argv) {
 
     gs.player_x += gs.player_vx * dt;
 
-    for (i = 0; i < 3; i++) {
+    char tile;
 
-      if (gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8)] == 3
-          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 1] == 3
-          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 2] == 3) {
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
 
-        gs.player_x = old_x;
-        alSourcePlay(gs.player_source);
-        if (gs.player_vx < 0)
-          gs.player_x = (int)(gs.player_x/8) * 8;
-        
-        else if (gs.player_vx > 0)
-          gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
+        tile = gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + j];
 
-        gs.player_vx = -gs.player_vx/2;
+        switch (tile) {
+
+          case TILE_CAUTION:
+            gs.player_x = old_x;
+            alSourcePlay(gs.player_source);
+            if (gs.player_vx < 0)
+              gs.player_x = (int)(gs.player_x/8) * 8;
+            
+            else if (gs.player_vx > 0)
+              gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
+
+            gs.player_vx = -gs.player_vx/2;
+            break;
+        }
       }
     }
 
     gs.player_y += gs.player_vy * dt;
 
-    for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
 
-      if (gs.tilemap[(int)(gs.player_x / 8)][(int)((gs.player_y + (i * 8)) / 8)] == 3
-          || gs.tilemap[(int)(gs.player_x / 8) + 1][(int)((gs.player_y + (i * 8)) / 8)] == 3
-          || gs.tilemap[(int)(gs.player_x / 8) + 2][(int)((gs.player_y + (i * 8)) / 8)] == 3) {
+        tile = gs.tilemap[(int)(gs.player_x / 8) + j][(int)((gs.player_y + (i * 8)) / 8)];
 
-        gs.player_y = old_y;
-        alSourcePlay(gs.player_source);
-        if (gs.player_vy < 0)
-          gs.player_y = (int)(gs.player_y/8) * 8;
-        
-        else if (gs.player_vy > 0)
-          gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
+        switch(tile) {
 
-        gs.player_vy = -gs.player_vy/2;
+          case TILE_CAUTION:
+            gs.player_y = old_y;
+            alSourcePlay(gs.player_source);
+            if (gs.player_vy < 0)
+              gs.player_y = (int)(gs.player_y/8) * 8;
+            
+            else if (gs.player_vy > 0)
+              gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
+
+            gs.player_vy = -gs.player_vy/2;
+            break;
+        }
       }
     }
 
@@ -167,11 +177,12 @@ static inline void render(GameState* gs) {
 
   int t_x = gs->cam_x/8;
   int t_y = gs->cam_y/8;
-
   for (j = t_y; j < 19+t_y; j++) {
     for (i = t_x; i < 21+t_x; i++) {
       if (gs->tilemap[i][j] == 0) continue;
-      glUniform2f(gs->tiles_program->uniform[2], gs->tilemap[i][j]%16, gs->tilemap[i][j]/16);
+
+      char tile = gs->tilemap[i][j];
+      glUniform2f(gs->tiles_program->uniform[2], tile%16, tile/16);
       glUniform2f(gs->tiles_program->uniform[0], roundf(8*i-gs->cam_x), roundf(8*j-gs->cam_y));
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
