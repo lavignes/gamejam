@@ -40,7 +40,7 @@ unsigned bitmap_load(const char* path) {
   // twiddle red and blue channels A1B5G5R5 -> A1R5G5B5
   for (int i = 0; i < size/2; ++i) {
     pixel = binary_data + i;
-    *pixel = (((*pixel & 0x7c06) >> 10) | (*pixel & 0x83e0) | ((*pixel & 0x1f) << 10));
+    *pixel = (((*pixel & 0x7c00) >> 10) | (*pixel & 0x83e0) | ((*pixel & 0x1f) << 10));
   }
 
   unsigned texture;
