@@ -10,7 +10,7 @@
 static inline void render(GameState* gs);
 int main(int argc, char** argv) {
 
-  int i;
+  int i, j;
 
   boot_init(&argc, argv);
 
@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
     t0 = t1;
 
     if (gs.frames > 60) {
-
       gs.fps = gs.frames / (t1 - gs.dt);
       printf("%.1lf fps\n", gs.fps);
       gs.dt = glfwGetTime();
@@ -41,29 +40,21 @@ int main(int argc, char** argv) {
     }
     gs.frames++;
     
-    if (glfwGetKey(GLFW_KEY_UP)) {
+    if (glfwGetKey(GLFW_KEY_UP))
       gs.player_vy -= 200 * dt;
-    }
-
-    if (glfwGetKey(GLFW_KEY_DOWN)) {
+    if (glfwGetKey(GLFW_KEY_DOWN))
       gs.player_vy += 200 * dt;
-    }
-
-    if (glfwGetKey(GLFW_KEY_LEFT)) {
+    if (glfwGetKey(GLFW_KEY_LEFT))
       gs.player_vx -= 200 * dt;
-    }
-
-    if (glfwGetKey(GLFW_KEY_RIGHT)) {
+    if (glfwGetKey(GLFW_KEY_RIGHT))
       gs.player_vx += 200 * dt;
-    }
 
     gs.player_vx = clampf(gs.player_vx, -400, 400);
     gs.player_vy = clampf(gs.player_vy, -400, 400);
 
-    gs.player_frame += dt;
-
     alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
     alSourcef(gs.player_source, AL_PITCH, (rand()%30)/10.0); 
+
     // Bouncy side walls
     if (gs.player_x < 0) {
       gs.player_x = 0;
@@ -89,41 +80,45 @@ int main(int argc, char** argv) {
 
     gs.player_x += gs.player_vx * dt;
 
-    for (i = 0; i < 3; i++) {
+    char tile = TILE_NONE;
 
-      if (gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8)] == 3
-          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 1] == 3
-          || gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + 2] == 3) {
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
+        tile = gs.tilemap[(int)((gs.player_x + (i * 8)) / 8)][(int)(gs.player_y / 8) + j];
 
-        gs.player_x = old_x;
-        alSourcePlay(gs.player_source);
-        if (gs.player_vx < 0)
-          gs.player_x = (int)(gs.player_x/8) * 8;
-        
-        else if (gs.player_vx > 0)
-          gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
+        switch (tile) {
+          case TILE_CAUTION:
+            gs.player_x = old_x;
+            alSourcePlay(gs.player_source);
+            if (gs.player_vx < 0)
+              gs.player_x = (int)(gs.player_x/8) * 8;
+            else if (gs.player_vx > 0)
+              gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
 
-        gs.player_vx = -gs.player_vx/2;
+            gs.player_vx = -gs.player_vx/2;
+            break;
+        }
       }
     }
 
     gs.player_y += gs.player_vy * dt;
 
-    for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      for (i = 0; i < 3; i++) {
+        tile = gs.tilemap[(int)(gs.player_x / 8) + j][(int)((gs.player_y + (i * 8)) / 8)];
 
-      if (gs.tilemap[(int)(gs.player_x / 8)][(int)((gs.player_y + (i * 8)) / 8)] == 3
-          || gs.tilemap[(int)(gs.player_x / 8) + 1][(int)((gs.player_y + (i * 8)) / 8)] == 3
-          || gs.tilemap[(int)(gs.player_x / 8) + 2][(int)((gs.player_y + (i * 8)) / 8)] == 3) {
+        switch(tile) {
+          case TILE_CAUTION:
+            gs.player_y = old_y;
+            alSourcePlay(gs.player_source);
+            if (gs.player_vy < 0)
+              gs.player_y = (int)(gs.player_y/8) * 8;
+            else if (gs.player_vy > 0)
+              gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
 
-        gs.player_y = old_y;
-        alSourcePlay(gs.player_source);
-        if (gs.player_vy < 0)
-          gs.player_y = (int)(gs.player_y/8) * 8;
-        
-        else if (gs.player_vy > 0)
-          gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
-
-        gs.player_vy = -gs.player_vy/2;
+            gs.player_vy = -gs.player_vy/2;
+            break;
+        }
       }
     }
 
@@ -135,6 +130,8 @@ int main(int argc, char** argv) {
     gs.cam_y = gs.player_y - 64;
     if (gs.cam_y < 0) gs.cam_y = 0;
     else if (gs.cam_y > 256*8-144) gs.cam_y = 256*8-144;
+
+    gs.player_frame += dt;
 
     render(&gs);
   }
@@ -167,11 +164,11 @@ static inline void render(GameState* gs) {
 
   int t_x = gs->cam_x/8;
   int t_y = gs->cam_y/8;
-
   for (j = t_y; j < 19+t_y; j++) {
     for (i = t_x; i < 21+t_x; i++) {
-      if (gs->tilemap[i][j] == 0) continue;
-      glUniform2f(gs->tiles_program->uniform[2], gs->tilemap[i][j]%16, gs->tilemap[i][j]/16);
+      if (gs->tilemap[i][j] == TILE_NONE) continue;
+      char tile = gs->tilemap[i][j];
+      glUniform2f(gs->tiles_program->uniform[2], tile%16, tile/16);
       glUniform2f(gs->tiles_program->uniform[0], roundf(8*i-gs->cam_x), roundf(8*j-gs->cam_y));
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
@@ -191,7 +188,7 @@ static inline void render(GameState* gs) {
   // Bind player vbo
   glBindBuffer(GL_ARRAY_BUFFER, gs->player_vbo);
   glEnableVertexAttribArray(gs->player_program->attribute[0]);
-  glVertexAttribPointer(gs->player_program->attribute[0], 2, GL_FLOAT, false, 4*sizeof(float), (void*)0);
+  glVertexAttribPointer(gs->player_program->attribute[0], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(0 * sizeof(float)));
   glEnableVertexAttribArray(gs->player_program->attribute[1]);
   glVertexAttribPointer(gs->player_program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
 

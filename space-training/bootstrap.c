@@ -5,6 +5,8 @@
 #include <AL/alut.h>
 
 #include "vbo/player.h"
+#include "vbo/tiles.h"
+
 #include "sound.h"
 
 #include "bootstrap.h"
@@ -109,7 +111,6 @@ void boot_init(int* argc, char** argv) {
 
   t0 = glfwGetTime();
   while (logo_y < 8) {
-
     t1 = glfwGetTime();
     dt = t1 - t0;
     t0 = t1;
@@ -133,14 +134,6 @@ void boot_init(int* argc, char** argv) {
 
   sleep(1);
 }
-
-float TILES_VBO[] = {
-
-  0, 0,     0,     0,
-  0, 8,     0, .0625,
-  8, 8, .0625, .0625,
-  8, 0, .0625,     0,
-};
 
 void game_init(GameState* gs) {
 
@@ -167,8 +160,7 @@ void game_init(GameState* gs) {
 
   // load player spritesheet
   gs->player_spritesheet = bitmap_load("bmp/player.bmp");
-  gs->player_x = 0;
-  gs->player_y = 0;
+  gs->player_x = gs->player_y = 0;
   gs->player_vx = gs->player_vy = 0;
 
   // create player render pipeline
@@ -188,6 +180,5 @@ void game_init(GameState* gs) {
 }
 
 void boot_shutdown() {
-
   glfwTerminate();
 }
