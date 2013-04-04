@@ -16,6 +16,22 @@
 
 #define clampf(v, min, max) (v < min)? min : (v > max)? max : v;
 
+typedef enum EntityType {
+
+  ENT_GAS
+} EntityType;
+
+typedef struct Entity {
+
+  unsigned vbo;
+  unsigned spritesheet;
+  float frame;
+  float vx, vy;
+  float x, y;
+  Pipeline* program;
+
+} Entity;
+
 typedef struct GameState {
 
   long unsigned frames; // # of frames rendered
@@ -41,6 +57,10 @@ typedef struct GameState {
   // Audio stuff
   Sound* bounce_sound;
   unsigned player_source; // Audio source for player sounds
+
+  // Entities
+  int num_entities;
+  Entity ent[10];
 
 } GameState;
 

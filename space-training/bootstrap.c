@@ -177,6 +177,14 @@ void game_init(GameState* gs) {
   // Load audio stuff
   gs->bounce_sound = sound_load("sound/bounce.ogg");
   alGenSources(1, &gs->player_source);
+
+  // Entity stuff
+  gs->num_entities = 1;
+  gs->ent[0].vbo = gs->player_vbo;
+  gs->ent[0].spritesheet = gs->player_spritesheet;
+  gs->ent[0].frame = 0;
+  gs->ent[0].x = gs->ent[0].y = 0;
+  gs->ent[0].program = gs->player_program;
 }
 
 void boot_shutdown() {

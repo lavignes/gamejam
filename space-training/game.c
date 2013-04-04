@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
             gs.player_x = old_x;
             alSourcePlay(gs.player_source);
             if (gs.player_vx < 0)
-              gs.player_x = (int)(gs.player_x/8) * 8;
+              gs.player_x = (int)(gs.player_x/8) * 8 + 1;
             else if (gs.player_vx > 0)
               gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
             gs.player_y = old_y;
             alSourcePlay(gs.player_source);
             if (gs.player_vy < 0)
-              gs.player_y = (int)(gs.player_y/8) * 8;
+              gs.player_y = (int)(gs.player_y/8) * 8 + 1;
             else if (gs.player_vy > 0)
               gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
 
@@ -132,6 +132,42 @@ int main(int argc, char** argv) {
     else if (gs.cam_y > 256*8-144) gs.cam_y = 256*8-144;
 
     gs.player_frame += dt;
+
+    for (i = 0; i < gs.num_entities; i++) {
+
+      if (gs.ent[i].y < gs.player_y)
+        gs.ent[i].vy += 200 * dt;
+      else if (gs.ent[i].y > gs.player_y)
+        gs.ent[i].vy -= 200 * dt;
+      if (gs.ent[i].x < gs.player_x)
+        gs.ent[i].vx += 200 * dt;
+      else if (gs.ent[i].x > gs.player_x)
+        gs.ent[i].vx -= 200 * dt;
+
+      gs.ent[i].vx = clampf(gs.ent[i].vx, -400, 400);
+      gs.ent[i].vy = clampf(gs.ent[i].vy, -400, 400);
+
+      // Bouncy side walls
+      if (gs.ent[i].x < 0) {
+        gs.ent[i].x = 0;
+        gs.ent[i].vx = -gs.ent[i].vx/2;
+      } else if (gs.ent[i].x > 256*8-16) {
+        gs.ent[i].x = 256*8-16;
+        gs.ent[i].vx = -gs.ent[i].vx/2;
+      }
+      if (gs.ent[i].y < 0) {
+        gs.ent[i].y = 0;
+        gs.ent[i].vy = -gs.ent[i].vy/2;
+      } else if (gs.ent[i].y > 256*8-16) {
+        gs.ent[i].y = 256*8-16;
+        gs.ent[i].vy = -gs.ent[i].vy/2;
+      }
+
+      gs.ent[i].x += gs.ent[i].vx * dt;
+      gs.ent[i].y += gs.ent[i].vy * dt;
+
+      gs.ent[i].frame += dt;
+    }
 
     render(&gs);
   }
@@ -199,6 +235,30 @@ static inline void render(GameState* gs) {
 
   glDisableVertexAttribArray(gs->player_program->attribute[0]);
   glDisableVertexAttribArray(gs->player_program->attribute[1]);
+
+  // Entities
+  for (i = 0; i < gs->num_entities; i++) {
+
+    glUseProgram(gs->ent[i].program->id);
+    glUniform2f(gs->ent[i].program->uniform[0], roundf(gs->ent[i].x-gs->cam_x), roundf(gs->ent[i].y-gs->cam_y));
+
+    // Bind the player to texture 0
+    glBindTexture(GL_TEXTURE_2D, gs->ent[i].spritesheet);
+    glUniform1i(gs->ent[i].program->uniform[1], 0);
+  
+    // Bind player vbo
+    glBindBuffer(GL_ARRAY_BUFFER, gs->ent[i].vbo);
+    glEnableVertexAttribArray(gs->player_program->attribute[0]);
+    glVertexAttribPointer(gs->ent[i].program->attribute[0], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(0 * sizeof(float)));
+    glEnableVertexAttribArray(gs->player_program->attribute[1]);
+    glVertexAttribPointer(gs->ent[i].program->attribute[1], 2, GL_FLOAT, false, 4*sizeof(float), (void*)(2 * sizeof(float)));
+    glUniform1i(gs->player_program->uniform[2], (gs->ent[i].vx > 0));
+
+    glDrawArrays(GL_TRIANGLE_FAN, 4*((int)gs->ent[i].frame % 2), 4);
+
+    glDisableVertexAttribArray(gs->ent[i].program->attribute[0]);
+    glDisableVertexAttribArray(gs->ent[i].program->attribute[1]);
+  }
 
   glfwSwapBuffers();
 }
