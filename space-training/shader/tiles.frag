@@ -1,10 +1,10 @@
-#version 120
+#version 130
 
-varying vec2 frag_uv;
-uniform sampler2D texture;
+varying vec2 frag_st;
+uniform sampler2D tex;
 
 void main() {
 
   // Get fragment color
-  gl_FragColor = texture2D(texture, vec2(frag_uv.x, 1.0 - frag_uv.y));
+  gl_FragColor = texture(tex, frag_st);
 }

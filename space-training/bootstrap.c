@@ -17,6 +17,13 @@ void boot_init(int* argc, char** argv) {
 
   fail_if(glfwInit() == false);
 
+  // OpenGL version 3
+  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
+  glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 0);
+
+  // Disable Deprecated shit for more speed
+  glfwOpenWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+
   // No window resize
   glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE, true);
   // 400% gameboy scale, 5 bit rgb with 1 bit alpha, 8 bit z buffer
@@ -64,10 +71,10 @@ void boot_init(int* argc, char** argv) {
   float t0, t1, dt;
   float logo_x = 16, logo_y = -80;
   float logo_v[] = {
-    0,     0, 0, 0,
-    0,   128, 0, 1,
-    128, 128, 1, 1,
-    128,   0, 1, 0,
+    0,     0, 0, 1.0 - 0,
+    0,   128, 0, 1.0 - 1,
+    128, 128, 1, 1.0 - 1,
+    128,   0, 1, 1.0 - 0,
   };
 
   glGenBuffers(1, &logo_vbo);
@@ -79,9 +86,9 @@ void boot_init(int* argc, char** argv) {
     shader_new(SHADER_FRAGMENT, "shader/logo.frag"));
 
   pipeline_attribute(logo_program, "coord", 0);
-  pipeline_attribute(logo_program, "uv", 1);
+  pipeline_attribute(logo_program, "st", 1);
   pipeline_uniform(logo_program, "pos", 0);
-  pipeline_uniform(logo_program, "texture", 1);
+  pipeline_uniform(logo_program, "tex", 1);
 
   glUseProgram(logo_program->id);
 
@@ -148,9 +155,9 @@ void game_init(GameState* gs) {
     shader_new(SHADER_FRAGMENT, "shader/tiles.frag"));
 
   pipeline_attribute(gs->tiles_program, "coord", 0);
-  pipeline_attribute(gs->tiles_program, "uv", 1);
+  pipeline_attribute(gs->tiles_program, "st", 1);
   pipeline_uniform(gs->tiles_program, "pos", 0);
-  pipeline_uniform(gs->tiles_program, "texture", 1);
+  pipeline_uniform(gs->tiles_program, "tex", 1);
   pipeline_uniform(gs->tiles_program, "tile", 2);
 
   // Bind player vbo
@@ -169,9 +176,9 @@ void game_init(GameState* gs) {
     shader_new(SHADER_FRAGMENT, "shader/player.frag"));
 
   pipeline_attribute(gs->player_program, "coord", 0);
-  pipeline_attribute(gs->player_program, "uv", 1);
+  pipeline_attribute(gs->player_program, "st", 1);
   pipeline_uniform(gs->player_program, "pos", 0);
-  pipeline_uniform(gs->player_program, "texture", 1);
+  pipeline_uniform(gs->player_program, "tex", 1);
   pipeline_uniform(gs->player_program, "dir", 2);
 
   // Load audio stuff
@@ -183,7 +190,8 @@ void game_init(GameState* gs) {
   gs->ent[0].vbo = gs->player_vbo;
   gs->ent[0].spritesheet = gs->player_spritesheet;
   gs->ent[0].frame = 0;
-  gs->ent[0].x = gs->ent[0].y = 0;
+  gs->ent[0].vx = gs->ent[0].vy = 8;
+  gs->ent[0].x = gs->ent[0].y = 8;
   gs->ent[0].program = gs->player_program;
 }
 
