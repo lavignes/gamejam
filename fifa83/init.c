@@ -1,6 +1,6 @@
 #include "init.h"
 
-void context_init(int* argc, char** argv) {
+void context_init() {
 
   glfwInit();
 
@@ -28,7 +28,7 @@ void context_init(int* argc, char** argv) {
 
   printf("GL Extension Wrangler: %s\n", glewGetString(GLEW_VERSION));
 
-  alutInit(argc, argv);
+  alutInit(NULL, NULL);
   glEnable(GL_SCISSOR_TEST); // Enable geometry culling
 
   // transparency
@@ -40,8 +40,8 @@ void context_init(int* argc, char** argv) {
   glDepthFunc(GL_LEQUAL);
 
   // Set up perspective
-  glOrtho(0, 256, 240, 0, -1.0, 1.0);
-  glDepthRange(-1.0, 1.0);
+  glOrtho(0, 256, 240, 0, -256, 256);
+  glDepthRange(-256, 256);
   glViewport(0, 0, 256 * 2, 240 * 2);
 }
 
@@ -49,5 +49,7 @@ void context_close() {
 
   // close glfw
   glfwTerminate();
+
+  // close alut
   alutExit();
 }

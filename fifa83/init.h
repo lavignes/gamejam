@@ -3,13 +3,14 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <GL/glfw.h>
 
 #include <AL/alut.h>
 
-void context_init(int* argc, char** argv);
+void context_init();
 
 void context_close();
 

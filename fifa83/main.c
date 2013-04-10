@@ -2,7 +2,7 @@
 #include "game.h"
 
 int main(int argc, char** argv) {
-  context_init(&argc, argv);
+  context_init();
   
   game_loop();
   

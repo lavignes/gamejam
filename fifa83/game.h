@@ -31,7 +31,8 @@ static const float MAP_VBO[] = {
 
 typedef struct Player {
 
-  float x, y;
+  bool go_home;
+  float x, y, vx, vy;
   int dir;
   float frame;
 
@@ -40,11 +41,18 @@ typedef struct Player {
 typedef struct GameState {
 
   float cam_x, cam_y;
+  unsigned my_player;
+
+  int z_pressed;
+  int x_pressed;
 
   Pipeline* ball_program;
   unsigned ball_vbo;
+  unsigned ball_team;
+  unsigned ball_player;
   float ball_x, ball_y;
   float ball_vx, ball_vy;
+  float ball_frame;
 
   Pipeline* map_program;
   unsigned map_vbo;
@@ -54,8 +62,8 @@ typedef struct GameState {
   unsigned player_vbo;
   unsigned player_spritesheet;
 
-  Player team1[6];
-  Player team2[6];
+  Player team1[5];
+  Player team2[5];
 
 } GameState;
 

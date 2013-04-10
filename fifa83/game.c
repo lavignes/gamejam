@@ -32,6 +32,8 @@ void game_init(GameState* gs) {
   gs->cam_x = 0;
   gs->cam_y = 0;
 
+  gs->my_player = 4;
+
   // Bind map vbo
   glGenBuffers(1, &gs->map_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, gs->map_vbo);
@@ -66,13 +68,37 @@ void game_init(GameState* gs) {
   pipeline_uniform(gs->player_program, "pos", 1);
   pipeline_uniform(gs->player_program, "frame", 2);
   pipeline_uniform(gs->player_program, "dir", 3);
+  pipeline_uniform(gs->player_program, "color", 4);
+
+  // Bind ball vbo
+  glGenBuffers(1, &gs->ball_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, gs->ball_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(BALL_VBO)*sizeof(float), BALL_VBO, GL_STATIC_DRAW);
+  gs->ball_program = pipeline_new(
+    shader_new(SHADER_VERTEX, "shader/ball.vert"),
+    shader_new(SHADER_FRAGMENT, "shader/ball.frag"));
+  pipeline_attribute(gs->ball_program, "coord", 0);
+  pipeline_attribute(gs->ball_program, "st", 1);
+  pipeline_uniform(gs->ball_program, "tex", 0);
+  pipeline_uniform(gs->ball_program, "pos", 1);
+  pipeline_uniform(gs->ball_program, "frame", 2);
+
+  gs->ball_team = 1;
+  gs->ball_player = 1;
+  gs->ball_x = 246;
+  gs->ball_y = 100;
+  gs->ball_frame = 0;
 
   // Setup teams
   for (i = 0; i < 6; i++) {
+    gs->team1[i].go_home = false;
     gs->team1[i].x = gs->team1[i].y = 0;
     gs->team1[i].dir = gs->team1[i].frame = 0;
+    gs->team2[i].go_home = false;
     gs->team2[i].x = gs->team2[i].y = 0;
     gs->team2[i].dir = gs->team2[i].frame = 0;
   }
 
+  gs->team1[gs->my_player].x = gs->ball_x;
+  gs->team1[gs->my_player].y = gs->ball_y;
 }
