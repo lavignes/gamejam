@@ -183,6 +183,7 @@ void game_init(GameState* gs) {
 
   // Load audio stuff
   gs->bounce_sound = sound_load("sound/bounce.ogg");
+  gs->ouch_sound = sound_load("sound/ouch.ogg");
   alGenSources(1, &gs->player_source);
 
   // Entity stuff

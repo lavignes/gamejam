@@ -56,6 +56,7 @@ typedef struct GameState {
 
   // Audio stuff
   Sound* bounce_sound;
+  Sound* ouch_sound;
   unsigned player_source; // Audio source for player sounds
 
   // Entities

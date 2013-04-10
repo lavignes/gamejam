@@ -52,26 +52,29 @@ int main(int argc, char** argv) {
     gs.player_vx = clampf(gs.player_vx, -400, 400);
     gs.player_vy = clampf(gs.player_vy, -400, 400);
 
-    alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
     alSourcef(gs.player_source, AL_PITCH, (rand()%30)/10.0); 
 
     // Bouncy side walls
     if (gs.player_x < 0) {
       gs.player_x = 0;
       gs.player_vx = -gs.player_vx/2;
+      alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
       alSourcePlay(gs.player_source);
     } else if (gs.player_x > 256*8-16) {
       gs.player_x = 256*8-16;
       gs.player_vx = -gs.player_vx/2;
+      alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
       alSourcePlay(gs.player_source);
     }
     if (gs.player_y < 0) {
       gs.player_y = 0;
       gs.player_vy = -gs.player_vy/2;
+      alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
       alSourcePlay(gs.player_source);
     } else if (gs.player_y > 256*8-16) {
       gs.player_y = 256*8-16;
       gs.player_vy = -gs.player_vy/2;
+      alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
       alSourcePlay(gs.player_source);
     }
 
@@ -89,6 +92,7 @@ int main(int argc, char** argv) {
         switch (tile) {
           case TILE_CAUTION:
             gs.player_x = old_x;
+            alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
             alSourcePlay(gs.player_source);
             if (gs.player_vx < 0)
               gs.player_x = (int)(gs.player_x/8) * 8;
@@ -96,6 +100,13 @@ int main(int argc, char** argv) {
               gs.player_x = (int)(((gs.player_x + 16) / 8) * 8) - 16;
 
             gs.player_vx = -gs.player_vx/2;
+            break;
+
+          case TILE_SPIKE_UP ... TILE_SPIKE_RIGHT:
+            alSourcei(gs.player_source, AL_BUFFER, gs.ouch_sound->buffer);
+            alSourcePlay(gs.player_source);
+            gs.player_x = old_x;
+            gs.player_vx = -gs.player_vx;
             break;
         }
       }
@@ -110,6 +121,7 @@ int main(int argc, char** argv) {
         switch(tile) {
           case TILE_CAUTION:
             gs.player_y = old_y;
+            alSourcei(gs.player_source, AL_BUFFER, gs.bounce_sound->buffer);
             alSourcePlay(gs.player_source);
             if (gs.player_vy < 0)
               gs.player_y = (int)(gs.player_y/8) * 8;
@@ -117,6 +129,13 @@ int main(int argc, char** argv) {
               gs.player_y = (int)(((gs.player_y + 16) / 8) * 8) - 16;
 
             gs.player_vy = -gs.player_vy/2;
+            break;
+
+          case TILE_SPIKE_UP ... TILE_SPIKE_RIGHT:
+            alSourcei(gs.player_source, AL_BUFFER, gs.ouch_sound->buffer);
+            alSourcePlay(gs.player_source);
+            gs.player_y = old_y;
+            gs.player_vy = -gs.player_vy;
             break;
         }
       }

@@ -10,6 +10,10 @@ static const char TileTable[] = {
   [0xFFFF] = TILE_BIGSTAR, // 0xffffff
   [0xD294] = TILE_STAR,    // 0xa1a1a1
   [0xFFE0] = TILE_CAUTION, // 0xfcff00
+  [0xFC00] = TILE_SPIKE_UP, // 0xff0000
+  [0xBC1F] = TILE_SPIKE_DOWN, // 0x7f00ff
+  [0xFC0F] = TILE_SPIKE_LEFT, // 0xff007f
+  [0xFC1F] = TILE_SPIKE_RIGHT // 0xff00ff
 };
 
 void tileset_load(GameState* gs, const char* path) {
