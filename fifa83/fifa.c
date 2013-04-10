@@ -43,6 +43,7 @@ void fifa_step(GameState* gs, float dt) {
     gs->ball_y = gs->team1[gs->ball_player].y+18;
     gs->ball_frame += sqrtf(powf(gs->team1[gs->ball_player].vx, 2) + powf(gs->team1[gs->ball_player].vy, 2)) * 0.1 * dt;
 
+    if (gs->ball_player != 0)
     for (i = 0; i < 5; i++) {
       if (bb_intersect(gs->team2[i].x, gs->team2[i].x+16, gs->team2[i].y+16, gs->team2[i].y+24,
                        gs->ball_x, gs->ball_x+8, gs->ball_y, gs->ball_y+8)) {
@@ -57,6 +58,7 @@ void fifa_step(GameState* gs, float dt) {
     gs->ball_y = gs->team2[gs->ball_player].y+18;
     gs->ball_frame += sqrtf(powf(gs->team2[gs->ball_player].vx, 2) + powf(gs->team2[gs->ball_player].vy, 2)) * 0.1 * dt;
 
+    if (gs->ball_player != 0)
     for (i = 0; i < 5; i++) {
       if (bb_intersect(gs->team1[i].x, gs->team1[i].x+16, gs->team1[i].y+16, gs->team1[i].y+24,
                        gs->ball_x, gs->ball_x+8, gs->ball_y, gs->ball_y+8)) {
@@ -65,7 +67,6 @@ void fifa_step(GameState* gs, float dt) {
         break;
       }
     }
-
   } else {
     gs->ball_vx = centerf(gs->ball_vx, 200 * dt, 1);
     gs->ball_vy = centerf(gs->ball_vy, 200 * dt, 1);
@@ -153,7 +154,7 @@ void fifa_step(GameState* gs, float dt) {
 }
 
 void fifa_draw(GameState* gs) {
-  int i;
+  unsigned i;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Draw map //////////////////////////////////////////////////////////////
@@ -207,7 +208,9 @@ void fifa_draw(GameState* gs) {
     glUniform2f(gs->player_program->uniform[1], gs->team1[i].x - gs->cam_x, gs->team1[i].y);
     glUniform1i(gs->player_program->uniform[2], (int) gs->team1[i].frame % 3);
     glUniform1i(gs->player_program->uniform[3], gs->team1[i].dir);
-    glUniform3f(gs->player_program->uniform[4], 0, 0, 1);
+    if (i == gs->my_player)
+      glUniform3f(gs->player_program->uniform[4], 0.4, 0.4, 1);
+    else glUniform3f(gs->player_program->uniform[4], 0, 0, 1);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
@@ -229,7 +232,7 @@ void fifa_draw(GameState* gs) {
   glfwSwapBuffers();
 }
 
-void ai_goalie1(GameState* gs, int pos, float dt) {
+void ai_goalie1(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x < 246 && gs->ball_team != 1) {
     if (gs->team1[pos].x < gs->ball_x)
       gs->team1[pos].vx += 300 * dt;
@@ -250,7 +253,7 @@ void ai_goalie1(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_forwardl1(GameState* gs, int pos, float dt) {
+void ai_forwardl1(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x > 246 && gs->ball_team != 1) {
     if (gs->team1[pos].x < gs->ball_x)
       gs->team1[pos].vx += 300 * dt;
@@ -273,7 +276,7 @@ void ai_forwardl1(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_forwardr1(GameState* gs, int pos, float dt) {
+void ai_forwardr1(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x > 246 && gs->ball_team != 1) {
     if (gs->team1[pos].x < gs->ball_x)
       gs->team1[pos].vx += 300 * dt;
@@ -296,7 +299,7 @@ void ai_forwardr1(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_centerl1(GameState* gs, int pos, float dt) {
+void ai_centerl1(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x < 246 && gs->ball_team != 1) {
     if (gs->team1[pos].x < gs->ball_x)
       gs->team1[pos].vx += 300 * dt;
@@ -319,7 +322,7 @@ void ai_centerl1(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_centerr1(GameState* gs, int pos, float dt) {
+void ai_centerr1(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x < 246 && gs->ball_team != 1) {
     if (gs->team1[pos].x < gs->ball_x)
       gs->team1[pos].vx += 300 * dt;
@@ -342,7 +345,7 @@ void ai_centerr1(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_goalie2(GameState* gs, int pos, float dt) {
+void ai_goalie2(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x > 246 && gs->ball_team != 2) {
     if (gs->team2[pos].x < gs->ball_x)
       gs->team2[pos].vx += 300 * dt;
@@ -354,7 +357,18 @@ void ai_goalie2(GameState* gs, int pos, float dt) {
       gs->team2[pos].vy -= 300 * dt;
   }
 
-  if (!gs->team2[pos].go_home) {
+  if (gs->ball_team == 2 && gs->ball_player == pos) {
+    gs->team2[pos].vx -= 300 * dt;
+    gs->team2[pos].go_home = true;
+    if (gs->team2[pos].x < 66) {
+      gs->ball_team = 0;
+      gs->ball_x = gs->ball_x + ((gs->team2[gs->ball_player].dir)? -8 : 8);
+      gs->ball_vx = gs->team2[gs->ball_player].vx * 2;
+      gs->ball_vy = gs->team2[gs->ball_player].vy * ((gs->team2[gs->ball_player].y > 100)? -2 : 2);
+    }
+  }
+
+  else if (!gs->team2[pos].go_home) {
     gs->team2[pos].x = clampf(gs->team2[pos].x, 440, 458);
     gs->team2[pos].y = clampf(gs->team2[pos].y, 44, 154);
   } else {
@@ -363,7 +377,7 @@ void ai_goalie2(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_forwardl2(GameState* gs, int pos, float dt) {
+void ai_forwardl2(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x < 246 && gs->ball_team != 2) {
     if (gs->team2[pos].x < gs->ball_x)
       gs->team2[pos].vx += 300 * dt;
@@ -377,7 +391,18 @@ void ai_forwardl2(GameState* gs, int pos, float dt) {
     }
   }
 
-  if (!gs->team2[pos].go_home) {
+  if (gs->ball_team == 2 && gs->ball_player == pos) {
+    gs->team2[pos].vx -= 300 * dt;
+    gs->team2[pos].go_home = true;
+    if (gs->team2[pos].x < 66) {
+      gs->ball_team = 0;
+      gs->ball_x = gs->ball_x + ((gs->team2[gs->ball_player].dir)? -8 : 8);
+      gs->ball_vx = gs->team2[gs->ball_player].vx * 2;
+      gs->ball_vy = gs->team2[gs->ball_player].vy * ((gs->team2[gs->ball_player].y > 100)? -2 : 2);
+    }
+  }
+
+  else if (!gs->team2[pos].go_home) {
     gs->team2[pos].x = clampf(gs->team2[pos].x, 58, 246);
     gs->team2[pos].y = clampf(gs->team2[pos].y, 22, 100);
   } else {
@@ -386,7 +411,7 @@ void ai_forwardl2(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_forwardr2(GameState* gs, int pos, float dt) {
+void ai_forwardr2(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x < 246 && gs->ball_team != 2) {
     if (gs->team2[pos].x < gs->ball_x)
       gs->team2[pos].vx += 300 * dt;
@@ -400,7 +425,18 @@ void ai_forwardr2(GameState* gs, int pos, float dt) {
     }
   }
 
-  if (!gs->team2[pos].go_home) {
+  if (gs->ball_team == 2 && gs->ball_player == pos) {
+    gs->team2[pos].vx -= 300 * dt;
+    gs->team2[pos].go_home = true;
+    if (gs->team2[pos].x < 66) {
+      gs->ball_team = 0;
+      gs->ball_x = gs->ball_x + ((gs->team2[gs->ball_player].dir)? -8 : 8);
+      gs->ball_vx = gs->team2[gs->ball_player].vx * 2;
+      gs->ball_vy = gs->team2[gs->ball_player].vy * ((gs->team2[gs->ball_player].y > 100)? -2 : 2);
+    }
+  }
+
+  else if (!gs->team2[pos].go_home) {
     gs->team2[pos].x = clampf(gs->team2[pos].x, 58, 246);
     gs->team2[pos].y = clampf(gs->team2[pos].y, 100, 188);
   } else {
@@ -409,7 +445,7 @@ void ai_forwardr2(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_centerl2(GameState* gs, int pos, float dt) {
+void ai_centerl2(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x > 246 && gs->ball_team != 2) {
     if (gs->team2[pos].x < gs->ball_x)
       gs->team2[pos].vx += 300 * dt;
@@ -423,7 +459,18 @@ void ai_centerl2(GameState* gs, int pos, float dt) {
     }
   }
 
-  if (!gs->team2[pos].go_home) {
+  if (gs->ball_team == 2 && gs->ball_player == pos) {
+    gs->team2[pos].vx -= 300 * dt;
+    gs->team2[pos].go_home = true;
+    if (gs->team2[pos].x < 66) {
+      gs->ball_team = 0;
+      gs->ball_x = gs->ball_x + ((gs->team2[gs->ball_player].dir)? -8 : 8);
+      gs->ball_vx = gs->team2[gs->ball_player].vx * 2;
+      gs->ball_vy = gs->team2[gs->ball_player].vy * ((gs->team2[gs->ball_player].y > 100)? -2 : 2);
+    }
+  }
+
+  else if (!gs->team2[pos].go_home) {
     gs->team2[pos].x = clampf(gs->team2[pos].x, 246, 458);
     gs->team2[pos].y = clampf(gs->team2[pos].y, 22, 100);
   } else {
@@ -432,7 +479,7 @@ void ai_centerl2(GameState* gs, int pos, float dt) {
   }
 }
 
-void ai_centerr2(GameState* gs, int pos, float dt) {
+void ai_centerr2(GameState* gs, unsigned pos, float dt) {
   if (gs->ball_x > 246 && gs->ball_team != 2) {
     if (gs->team2[pos].x < gs->ball_x)
       gs->team2[pos].vx += 300 * dt;
@@ -446,7 +493,18 @@ void ai_centerr2(GameState* gs, int pos, float dt) {
     }
   }
 
-  if (!gs->team2[pos].go_home) {
+  if (gs->ball_team == 2 && gs->ball_player == pos) {
+    gs->team2[pos].vx -= 300 * dt;
+    gs->team2[pos].go_home = true;
+    if (gs->team2[pos].x < 66) {
+      gs->ball_team = 0;
+      gs->ball_x = gs->ball_x + ((gs->team2[gs->ball_player].dir)? -8 : 8);
+      gs->ball_vx = gs->team2[gs->ball_player].vx * 2;
+      gs->ball_vy = gs->team2[gs->ball_player].vy * ((gs->team2[gs->ball_player].y > 100)? -2 : 2);
+    }
+  }
+
+  else if (!gs->team2[pos].go_home) {
     gs->team2[pos].x = clampf(gs->team2[pos].x, 246, 458);
     gs->team2[pos].y = clampf(gs->team2[pos].y, 100, 188);
   } else {

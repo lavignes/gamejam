@@ -21,9 +21,6 @@ void boot_init(int* argc, char** argv) {
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
   glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 0);
 
-  // Disable Deprecated shit for more speed
-  glfwOpenWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
-
   // No window resize
   glfwOpenWindowHint(GLFW_WINDOW_NO_RESIZE, true);
   // 400% gameboy scale, 5 bit rgb with 1 bit alpha, 8 bit z buffer
